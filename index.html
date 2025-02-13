@@ -1,39 +1,96 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <script src="//cdn.jsdelivr.net/npm/@clappr/player@0.8/dist/clappr.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/@swarmcloud/hls/p2p-engine.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://la12hd.com/cssm.css">
-    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/DSports.png/640px-DSports.png">
-    <title>DSports</title>
-    <style>body, html {margin: 0;padding: 0;width: 100%;height: 100%;overflow: hidden;}#player {position: absolute;top: 0;left: 0;width: 100%;height: 100%;}</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>elProfetNet.co</title>
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <!-- Styles for All -->
+     <!-- Font Awesome -->
+ <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
+ <!-- SweetAlert2 -->
+ <link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.min.css" />
+ <!-- Theme style -->
+ <link rel="stylesheet" href="dist/css/adminlte.min.css">
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+     rel="stylesheet">
+ <!-- Toastr -->
+ <link rel="stylesheet" href="plugins/toastr/toastr.min.css" />    <!-- Main style -->
+    <link rel="stylesheet" href="css/canal.css?v20250213100434">
 </head>
-<body>
-<div id="player"></div>
-<script>
-    var playbackURL = "https://bmf0aw9u.fubohd.com:443/load/dsports/mono.m3u8?token=0ed65cf55683ca6d43720266c72b27106132db75-e0-1739156857-1739120857";
-    var p2pConfig = {
-        live: true,
-        trackerZone: 'us',    
-    }
-    P2PEngineHls.tryRegisterServiceWorker(p2pConfig).then(() => {
-        var player = new Clappr.Player({
-            source: playbackURL,
-            parentId: "#player",
-            poster: '',
-            width: '100%',
-            height: '100%',
-            autoPlay: true,
-            plugins: [],
-            mediacontrol: {seekbar: "#D4ED31", buttons: "#FFFFFF"},
 
-        });
-        p2pConfig.hlsjsInstance = player.core.getCurrentPlayback()?._hls;
-        var engine = new P2PEngineHls(p2pConfig);
-    });
-</script>
+<body style="color: white;">
+    <div class="videoPlayer">
+        <p class="estadoSignal" style="display: block;"><span class="spinner-border spinner-border-sm" role="status"
+                aria-hidden="true"></span> Iniciando señal...
+        </p>
+        <div id="player" class="videoPlayer"></div>
+    </div>
+        <!-- jQuery -->
+    <script src="plugins/jquery/jquery.min.js"></script>
+    <!-- Sweetalert2 -->
+    <script src="plugins/sweetalert2/sweetalert2.min.js"></script>
+    <!-- Platforms -->
+    <script src="plugins/platform/platform.min.js"></script>
+    <!-- Toastr -->
+    <script src="plugins/toastr/toastr.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>    <!-- JWPlayer -->
+    <script type="text/javascript" src="https://cdn.jwplayer.com/libraries/OTr036Wj.js"></script>
+    <script type="text/javascript">
+    jwplayer.key = "OTr036Wj";
+    </script>
+    <!-- Main -->
+    <script>
+    $.ajax({
+        type: "post",
+        data: {
+            tipo: "generarToken"
+        },
+        url: "funciones/token.php",
+        success: function(data) {
 
+            let resultado = JSON.parse(data);
+            let estadoSignal = document.querySelector('.estadoSignal');
+            estadoSignal.style.display = 'none';
+            const playerInstance = jwplayer('player').setup({
+                file: resultado.urlMac,
+                cast: {},
+                title: resultado.nombreCanal,
+                repeat: true,
+                autostart: true
+            });
+
+            var playlistItem = playerInstance.getPlaylistItem();
+            var videoPosition = 0;
+
+            playerInstance.on('error', function() {
+                location.reload();
+            });
+
+            if (resultado.tipoCanal === "4") {
+
+                jwplayer().on('time', function(event) {
+                    localStorage.setItem(resultado.nombreCanal, event.position);
+                });
+
+                jwplayer().on('ready', function() {
+                    videoPosition = localStorage.getItem(resultado.nombreCanal);
+                    if (videoPosition !== null) {
+                        playerInstance.seek(parseFloat(videoPosition));
+                    }
+
+                });
+            }
+        }
+    })
+    </script>
 </body>
+
+<!-- Main -->
+<script src="js/validarTiempo.js?v20250213100434"></script>
 
 </html>
